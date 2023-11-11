@@ -35,7 +35,8 @@ type SubmitData = {
   file: string;
   format_type: string;
   quality: string;
-  compression_preset: string;
+  bitrate: string;
+  chanell: string;
 };
 
 export default function App(): React.ReactElement {
@@ -49,6 +50,7 @@ export default function App(): React.ReactElement {
       file: "",
       format_type: "",
       quality: "",
+      bitrate: ''
     },
   });
 
@@ -65,11 +67,12 @@ export default function App(): React.ReactElement {
     );
     formData.append("format_type", data.format_type);
     formData.append("quality", data.quality);
-    formData.append("compression_preset", data.compression_preset);
+    formData.append("bitrate", data.bitrate);
+    formData.append("chanell", data.chanell);
 
     setLoading((l) => !l);
     try {
-      const response = await fetch("http://localhost:8000/index.php", {
+      const response = await fetch("http://localhost/videoconverter", {
         method: "POST",
         body: formData,
         signal: controller.signal,
@@ -97,7 +100,7 @@ export default function App(): React.ReactElement {
         });
       }
     } catch (e) {
-      toast({
+      return toast({
         title: "Error",
         // @ts-ignore
         description: e.message,
@@ -206,12 +209,9 @@ export default function App(): React.ReactElement {
                                 <SelectValue placeholder="Selecione" />
                               </SelectTrigger>
                               <SelectContent position="popper">
-                                <SelectItem value="51">Péssima</SelectItem>
-                                <SelectItem value="45">Horrível</SelectItem>
-                                <SelectItem value="34">Ruim</SelectItem>
-                                <SelectItem value="23">Normal</SelectItem>
-                                <SelectItem value="15">Boa</SelectItem>
-                                <SelectItem value="10">Muito Boa</SelectItem>
+                                <SelectItem value="9">Péssima</SelectItem>
+                                <SelectItem value="6">Normal</SelectItem>
+                                <SelectItem value="3">Boa</SelectItem>
                                 <SelectItem value="0">Ótima</SelectItem>
                               </SelectContent>
                             </Select>
@@ -227,35 +227,59 @@ export default function App(): React.ReactElement {
                   <FormField
                     control={form.control}
                     defaultValue={""}
-                    name={"compression_preset"}
+                    name={"bitrate"}
                     rules={{ required: true }}
                     render={({ field }) => (
                       <>
                         <FormItem>
-                          <FormLabel>Compressão:</FormLabel>
+                          <FormLabel>Bitrate</FormLabel>
                           <FormControl>
                             <Select
                               onValueChange={field.onChange}
                               defaultValue={field.value}
                             >
-                              <SelectTrigger {...field}>
+                              <SelectTrigger id="bitrate" {...field}>
                                 <SelectValue placeholder="Selecione" />
                               </SelectTrigger>
                               <SelectContent position="popper">
-                                <SelectItem value="slow">
-                                  Muito boa (Mais lento)
-                                </SelectItem>
-                                <SelectItem value="medium">Normal</SelectItem>
-                                <SelectItem value="ultrafast">
-                                  Péssima (Mais rápido)
-                                </SelectItem>
+                                <SelectItem value="64K">64K</SelectItem>
+                                <SelectItem value="128K">128K</SelectItem>
+                                <SelectItem value="192K">192K</SelectItem>
+                                <SelectItem value="320K">320K</SelectItem>
                               </SelectContent>
                             </Select>
                           </FormControl>
-                          <FormDescription>
-                            Qualidade de compressão do arquivo final (quanto
-                            mais lento melhor)
-                          </FormDescription>
+                          <FormDescription>Quanto maior, m</FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      </>
+                    )}
+                  />
+                </div>
+                <div className="flex flex-col space-y-1.5">
+                  <FormField
+                    control={form.control}
+                    defaultValue={""}
+                    name={"chanell"}
+                    rules={{ required: true }}
+                    render={({ field }) => (
+                      <>
+                        <FormItem>
+                          <FormLabel>Canal</FormLabel>
+                          <FormControl>
+                            <Select
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                            >
+                              <SelectTrigger id="bitrate" {...field}>
+                                <SelectValue placeholder="Selecione" />
+                              </SelectTrigger>
+                              <SelectContent position="popper">
+                                <SelectItem value="1">Mono</SelectItem>
+                                <SelectItem value="2">Stéreo</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
                           <FormMessage />
                         </FormItem>
                       </>
