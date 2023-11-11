@@ -70,44 +70,48 @@ export default function App(): React.ReactElement {
     formData.append("bitrate", data.bitrate);
     formData.append("chanell", data.chanell);
 
-    setLoading((l) => !l);
-    try {
-      const response = await fetch("http://localhost/videoconverter", {
+    const toggleLoading = () => setLoading((l) => !l);
+
+    toggleLoading();
+    
+      const response = await fetch("https://036c-45-233-89-229.ngrok-free.app/videoconverter", {
         method: "POST",
         body: formData,
         signal: controller.signal,
       });
-      const responseData = await response.json();
+      
+      if (response.status !== 200) {
+        return toast({
+          title: "Error",
+          // @ts-ignore
+          description: response.error,
+          action: <ToastAction altText="Goto schedule to undo">Undo</ToastAction>,
+        });
+      }
 
+      const responseData = await response.json();
+      
       if (responseData.file) {
         const byteCharacters = window.atob(responseData.file);
         const byteNumbers = new Array(byteCharacters.length);
-
+        
         for (let i = 0; i < byteCharacters.length; i++) {
           byteNumbers[i] = byteCharacters.charCodeAt(i);
         }
-
+        
         const byteArray = new Uint8Array(byteNumbers);
         const blob = new Blob([byteArray], {
           type: `audio/${data.format_type}`,
         });
         const url = URL.createObjectURL(blob);
-
+        
         return navigate("/success", {
           state: {
             url,
           },
         });
       }
-    } catch (e) {
-      return toast({
-        title: "Error",
-        // @ts-ignore
-        description: e.message,
-        action: <ToastAction altText="Goto schedule to undo">Undo</ToastAction>,
-      });
-    }
-    setLoading((l) => !l);
+      toggleLoading();
     setDisabled(true);
   };
 
