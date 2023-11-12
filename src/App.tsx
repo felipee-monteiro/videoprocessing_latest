@@ -30,6 +30,7 @@ import { useNavigate } from "react-router-dom";
 import { ReloadIcon } from "@radix-ui/react-icons";
 import { useToast } from "./components/ui/use-toast";
 import { ToastAction } from "@/components/ui/toast";
+import { Checkbox } from "@/components/ui/checkbox";
 
 type SubmitData = {
   file: string;
@@ -37,6 +38,7 @@ type SubmitData = {
   quality: string;
   bitrate: string;
   chanell: string;
+  default_config: boolean;
 };
 
 export default function App(): React.ReactElement {
@@ -69,49 +71,41 @@ export default function App(): React.ReactElement {
     formData.append("quality", data.quality);
     formData.append("bitrate", data.bitrate);
     formData.append("chanell", data.chanell);
+    formData.append("default_config", data.default_config);
 
     const toggleLoading = () => setLoading((l) => !l);
 
     toggleLoading();
-    
-      const response = await fetch("https://036c-45-233-89-229.ngrok-free.app/videoconverter", {
-        method: "POST",
-        body: formData,
-        signal: controller.signal,
-      });
-      
-      if (response.status !== 200) {
-        return toast({
-          title: "Error",
-          // @ts-ignore
-          description: response.error,
-          action: <ToastAction altText="Goto schedule to undo">Undo</ToastAction>,
-        });
+
+    const response = await fetch("http://localhost/videoconverter", {
+      method: "POST",
+      body: formData,
+      signal: controller.signal,
+    });
+
+    const responseData = await response.json();
+
+    if (responseData.file) {
+      const byteCharacters = window.atob(responseData.file);
+      const byteNumbers = new Array(byteCharacters.length);
+
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
       }
 
-      const responseData = await response.json();
-      
-      if (responseData.file) {
-        const byteCharacters = window.atob(responseData.file);
-        const byteNumbers = new Array(byteCharacters.length);
-        
-        for (let i = 0; i < byteCharacters.length; i++) {
-          byteNumbers[i] = byteCharacters.charCodeAt(i);
-        }
-        
-        const byteArray = new Uint8Array(byteNumbers);
-        const blob = new Blob([byteArray], {
-          type: `audio/${data.format_type}`,
-        });
-        const url = URL.createObjectURL(blob);
-        
-        return navigate("/success", {
-          state: {
-            url,
-          },
-        });
-      }
-      toggleLoading();
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], {
+        type: `audio/${data.format_type}`,
+      });
+      const url = URL.createObjectURL(blob);
+
+      return navigate("/success", {
+        state: {
+          url,
+        },
+      });
+    }
+    toggleLoading();
     setDisabled(true);
   };
 
@@ -232,7 +226,7 @@ export default function App(): React.ReactElement {
                     control={form.control}
                     defaultValue={""}
                     name={"bitrate"}
-                    rules={{ required: true }}
+                    rules={{ required: false }}
                     render={({ field }) => (
                       <>
                         <FormItem>
@@ -265,7 +259,7 @@ export default function App(): React.ReactElement {
                     control={form.control}
                     defaultValue={""}
                     name={"chanell"}
-                    rules={{ required: true }}
+                    rules={{ required: false }}
                     render={({ field }) => (
                       <>
                         <FormItem>
@@ -289,6 +283,26 @@ export default function App(): React.ReactElement {
                       </>
                     )}
                   />
+                  <div className="flex flex-col space-y-1.5">
+                    <FormField
+                      control={form.control}
+                      defaultValue={""}
+                      name={"default_config"}
+                      rules={{ required: false }}
+                      render={({ field }) => (
+                        <>
+                          <FormItem>
+                            <FormLabel>Usar configurações padrão</FormLabel>
+                            <FormControl>
+                              <Checkbox checked={field.value}
+                                onCheckedChange={field.onChange} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        </>
+                      )}
+                    />
+                  </div>
                 </div>
               </div>
               <CardFooter className="flex justify-between mt-6 p-0">
