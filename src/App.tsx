@@ -28,8 +28,6 @@ import {
 } from "./components/ui/form";
 import { useNavigate } from "react-router-dom";
 import { ReloadIcon } from "@radix-ui/react-icons";
-import { useToast } from "./components/ui/use-toast";
-import { ToastAction } from "@/components/ui/toast";
 import { Checkbox } from "@/components/ui/checkbox";
 
 type SubmitData = {
@@ -45,7 +43,6 @@ export default function App(): React.ReactElement {
   const [disabled, setDisabled] = React.useState<boolean>(true);
   const [loading, setLoading] = React.useState<boolean>(false);
   const [controller, setController] = React.useState<AbortController>();
-  const { toast } = useToast();
   const navigate = useNavigate();
   const form = useForm<SubmitData>({
     defaultValues: {
@@ -71,13 +68,14 @@ export default function App(): React.ReactElement {
     formData.append("quality", data.quality);
     formData.append("bitrate", data.bitrate);
     formData.append("chanell", data.chanell);
+    // @ts-ignore
     formData.append("default_config", data.default_config);
 
     const toggleLoading = () => setLoading((l) => !l);
 
     toggleLoading();
 
-    const response = await fetch("http://localhost/videoconverter", {
+    const response = await fetch("http://192.168.1.5/videoconverter", {
       method: "POST",
       body: formData,
       signal: controller.signal,
@@ -226,7 +224,7 @@ export default function App(): React.ReactElement {
                     control={form.control}
                     defaultValue={""}
                     name={"bitrate"}
-                    rules={{ required: false }}
+                    rules={{ required: !form.getValues('default_config') }}
                     render={({ field }) => (
                       <>
                         <FormItem>
@@ -259,7 +257,7 @@ export default function App(): React.ReactElement {
                     control={form.control}
                     defaultValue={""}
                     name={"chanell"}
-                    rules={{ required: false }}
+                    rules={{ required: !form.getValues('default_config') }}
                     render={({ field }) => (
                       <>
                         <FormItem>
@@ -286,17 +284,17 @@ export default function App(): React.ReactElement {
                   <div className="flex flex-col space-y-1.5">
                     <FormField
                       control={form.control}
-                      defaultValue={""}
+                      defaultValue={false}
                       name={"default_config"}
                       rules={{ required: false }}
                       render={({ field }) => (
                         <>
                           <FormItem>
-                            <FormLabel>Usar configurações padrão</FormLabel>
                             <FormControl>
                               <Checkbox checked={field.value}
-                                onCheckedChange={field.onChange} />
+                                onCheckedChange={field.onChange} style={{ margin: "1rem 0.3rem" }} />
                             </FormControl>
+                            <FormLabel>Usar configurações recomendadas</FormLabel>
                             <FormMessage />
                           </FormItem>
                         </>
