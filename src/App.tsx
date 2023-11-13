@@ -75,7 +75,7 @@ export default function App(): React.ReactElement {
 
     toggleLoading();
 
-    const response = await fetch("http://192.168.1.5/videoconverter", {
+    const response = await fetch("http://192.168.1.5/videoconverter/audio", {
       method: "POST",
       body: formData,
       signal: controller.signal,
